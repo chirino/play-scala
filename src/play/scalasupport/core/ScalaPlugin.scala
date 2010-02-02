@@ -87,6 +87,7 @@ class ScalaPlugin extends PlayPlugin {
         settings.debuginfo.level = 3
         settings.outputDirs setSingleOutput virtualDirectory   
         settings.deprecation.value = true
+		settings.classpath.value = System.getProperty("java.class.path")
         private val compiler = new Global(settings, reporter)
 
         def compile(sources: List[VFile]) = {
