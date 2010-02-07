@@ -4,7 +4,9 @@ import java.io.File
 import play.Play
 import play.db.jpa.JPAPlugin
 import jline.ConsoleReader
-
+/**
+* provides a simple REPL while keeping play's classpath
+**/
 object Console {
    def main(args : Array[String]) {
      val root = new File(System.getProperty("application.path"));
@@ -18,6 +20,7 @@ object Console {
      try {
        //launch readline loop using play's classloader
        val command = new GenericRunnerCommand(Nil, (error:String) => println(error))
+       command.settings.classpath.value = System.getProperty("java.class.path")
        JLine.withJLine {
             val loop = new InterpreterLoop {
               override def createInterpreter() = {
@@ -27,7 +30,7 @@ object Console {
             loop.main(command.settings)
         }     
      } catch {
-	case e:Exception=>
+	      case e:Exception=> e.printStackTrace()
      }
      // After the repl exits, kill the scala script
      JPAPlugin.closeTx(false)

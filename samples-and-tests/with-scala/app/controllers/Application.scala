@@ -8,7 +8,7 @@ import play.libs._
 
 import models._
 
-object Application extends Actions {
+object Application extends Controller {
     
     @Before
     private def check {
@@ -41,7 +41,7 @@ object Application extends Actions {
         
         info("Yop %d", 9)
         
-        val users = find[User]("byPassword", "88style").fetch
+        val users = QueryOn[User].find("byPassword", "88style").fetch
         
         response <<< OK
         response <<< "YOUHOU" 

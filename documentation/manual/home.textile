@@ -24,9 +24,7 @@ import play._
 import play.mvc._
  
 object Application extends Controller {
-    
-    def index = render()
-    
+  def index = render()
 }
 
 It is very close to the Java version of the default Application controller.
@@ -75,19 +73,17 @@ Let's define a Secure trait:
 
 bc. package controllers
  
-import play.__
-import play.mvc.__ 
+import play._
+import play.mvc._ 
  
 trait Secure extends Controller {
-	
-	@Before
-	def check {
-		session("user") match {
-			name: String => info("Logged as %s", name)
-			_ => Security.login
-		}
-	}
-	
+  @Before
+  def check {
+    session("user") match {
+      name: String => info("Logged as %s", name)
+      _ => Security.login
+    }
+  }
 }
 
 And you can them use it in the Application controller:
@@ -95,48 +91,48 @@ And you can them use it in the Application controller:
 bc. package controllers
  
 object Application extends Controller with Secure {
-	
-	def index = "Hello world"
-	
+  def index = "Hello world"
 }
 
 
 h2. <a>How to define and access Models</a>
 
-Models can be defined not only in java but in scala as well. Unfortunately, due to the differences between the two langauges the Model API somewhat differs from the java version.
+Models can be defined not only in java but in scala as well.
 
-h3. Main differences
+h3.  Scala Models have the following characteristics:
 
-* fields are passed as contructor arguments
-* each and every class needs to extend Model[T] 
-* helper methods should be defined in the companion object
-* companion objects need to extend Model[T]
+* each and every class needs to extend Model
+* fields are defined as constructor arguments
+* companion object needs to extend QueryOn[T]  
+* extra finder methods should be defined in the companion object
+
 here is an example:
 
-bc. @Entity
+bc.. @Entity
 class User(
   //fields
+
   @Email
   @Required
   var email: String,
+
   @Required
   var password: String,
+  
   var fullname: String
-) extends Model[User] {
+
+) extends Model {
     //instance methods
     var isAdmin = false
     override def toString = email
 }
-//finder methods
-object User extends Model[User] {
-    def connect(email: String, password: String) = {
-        User.find("byEmailAndPassword", email, password).first
-    }
+object User extends QueryOn[User] {
+//extra finder methods (if any) come here
 }
 
-h3. <a>Running queries against Scala Models from Scala classes</a>
+h3. <a>Running queries against Models</a>
 
-The following methods are available when running queries against scala models:
+The following methods are available:
 
 bc. def count(implicit m: M[T]) = i.count(m)
 def count(q: String, ps: AnyRef*)(implicit m: M[T])  
@@ -150,40 +146,15 @@ def deleteAll(implicit m: M[T]) =
 def findOneBy(q: String, ps: AnyRef*)(implicit m: M[T]): T 
 def create(name: String, ps: play.mvc.Scope.Params)(implicit m: M[T]): T
 
-As you can see, it's really similar to the java API, so for example to count the number of users, you can just call count on the User class:
+As you can see, it's really similar to the java API, so for example to count the number of users, you can just call count on the User class (assuming you defined the appropriate companion object):
 
 bc. User.count
 
 p(note). One known limitation of the Scala Model API is that the *save* method is not working in a chained call fashion, so you always need to execute it on an instance, as you can see it later at the unit testing section
 
-h3. <a>Running queries against Java Models from Scala classes</a>
+Another approach to access models is to utilize *play.db.jpa.QueryOn* object, so using the previous example: *User.count* becomes *QueryOn[User].count* 
 
-In certain situations it might be desirable to query models written in java from scala.
-Since java models are not extending from the scala Model trait, Play needs to provide an alternative query interface which comes in the form of *QueryRunner* trait and the corresponding companion object. In order to utilize this feature you either need to import the query methods like
-
-bc. import play.db.jpa.QueryRunner._
-
-or you can mix in the trait
-
-bc. class MyController extends Controller with QueryRunner {...} 
-
-and the API is defined like this:
-
-bc. def count[T](implicit m: M[T]) = i.count(m)
-def count[T](q: String, ps: AnyRef*)(implicit m: M[T])  
-def findAll[T](implicit m: M[T]) 
-def findById[T](id: Any)(implicit m: M[T]) 
-def findBy[T](q: String, ps: AnyRef*)(implicit m: M[T]) 
-def find[T](q: String, ps: AnyRef*)(implicit m: M[T]) 
-def all[T](implicit m: M[T]) 
-def delete[T](q: String, ps: AnyRef*)(implicit m: M[T]) 
-def deleteAll[T](implicit m: M[T]) = 
-def findOneBy[T <: JPASupport](q: String, ps: AnyRef*)(implicit m: M[T]): T 
-def create[T <: JPASupport](name: String, ps: play.mvc.Scope.Params)(implicit m: M[T]): T
-
-
-Using the previous example *User.count* becomes *count[User]* 
-
+p(note). Usually it's recommended to use the companinon object form to provide query functionality (ie. User.count). The main advantage of the more generic *QueryOn* approach is that it's working with both *scala and java* models. 
 
 h2. <a>Unit Testing</a>
 
@@ -199,10 +170,47 @@ bc. class SpecStyle extends UnitTest with FlatSpec with ShouldMatchers {
  }
 }
 
-h2. <a>Tutorial</a>
+h2. <a> Scala console</a>
 
-p(note). We are currently writing a version of the "play tutorial":guide1 for scala. 
+play-scala comes with a console which can be really useful to try out various layers of your application.
+
+here is an example session:
+
+bc.. kola:yabe-with-scala phausel$ play scala:console
+~        _            _ 
+~  _ __ | | __ _ _  _| |
+~ | '_ \| |/ _' | || |_|
+~ |  __/|_|\____|\__ (_)
+~ |_|            |__/   
+~
+~ play! 1.1-unstable-localbuild, http://www.playframework.org
+~
+15:43:17,805 INFO  ~ Starting /Users/phausel/workspace/play-scala/samples-and-tests/yabe-with-scala
+15:43:17,809 INFO  ~ Module secure is available (/opt/local/lib/play-1.1-unstable-r777/modules/secure)
+15:43:17,809 INFO  ~ Module scala is available (/Users/phausel/workspace/play-scala/samples-and-tests/yabe-with-scala/../..)
+15:43:17,810 INFO  ~ Module crud is available (/opt/local/lib/play-1.1-unstable-r777/modules/crud)
+15:43:19,300 WARN  ~ You're running Play! in DEV mode
+~
+~ Starting up, please be patient
+~ Ctrl+D to stop
+~
+15:43:31,774 INFO  ~ Connected to jdbc:hsqldb:mem:playembed
+15:43:33,130 INFO  ~ Application 'Yet Another Blog Engine' is now started !
+Welcome to Scala version 2.8.0.Beta1-prerelease (Java HotSpot(TM) 64-Bit Server VM, Java 1.6.0_17).
+Type in expressions to have them evaluated.
+Type :help for more information.
+
+scala> import models._
+import models._
+
+scala> User.count     
+res0: Long = 3
+
+p(note). commands are executed in a transaction, so changes to your models will be persistent
+
+h2. <a>Yabe with Scala</a>
+
+A scala version of the blog application is boundled with play-scala and can be found "here":http://github.com/guillaumebort/play-scala/tree/master/samples-and-tests/ 
  
-Read "The play tutorial (Scala version)":scguide1.
 
 

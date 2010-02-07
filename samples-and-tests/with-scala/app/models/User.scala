@@ -12,7 +12,7 @@ class User(
     var fullname: String
 ) extends Model {
  
-    var isAdmin: boolean = false
+    var isAdmin: Boolean = false
  
 }
 
