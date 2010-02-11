@@ -1,12 +1,13 @@
 package play.scalasupport.wrappers;
 
 import java.io.InputStream;
+import play.Play;
 import play.mvc.Controller;
-
 public class ControllerWrapper extends Controller {
-    
+
     public static void render(Object... args) {
-        Controller.render(args);
+			 String template = ScalateWrapper.renderOrProvideTemplate(args);
+			 if (template != null) Controller.renderTemplate(template,args);
     }
     
     public static void renderText(Object text) {

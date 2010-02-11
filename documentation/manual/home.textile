@@ -210,7 +210,7 @@ p(note). commands are executed in a transaction, so changes to your models will 
 
 h2. <a>Yabe with Scala</a>
 
-A scala version of the blog application is boundled with play-scala and can be found "here":http://github.com/guillaumebort/play-scala/tree/master/samples-and-tests/ 
+A scala version of the blog application is bundled with play-scala and can be found "here":http://github.com/guillaumebort/play-scala/tree/master/samples-and-tests/ 
  
 
 
