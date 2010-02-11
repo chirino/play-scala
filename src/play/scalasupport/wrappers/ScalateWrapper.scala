@@ -23,6 +23,7 @@ private[wrappers] object ScalateWrapper  {
   if (Play.mode == Play.Mode.PROD) {
     engine.allowReload = false
   }
+  engine.resourceLoader = new FileResourceLoader(Some(new File(Play.applicationPath+"/app/views")))
   
   def renderOrProvideTemplate(args:Array[AnyRef]):String = {
     //determine template
@@ -79,7 +80,7 @@ private[wrappers] object ScalateWrapper  {
     } catch { case ex:Exception => throw new UnexpectedException(ex)}
     
     try {
-          val templatePath = Play.applicationPath+"/app/views/"+templateName.replaceAll(".html","."+renderMode)
+          val templatePath = templateName.replaceAll(".html","."+renderMode)
           val template = engine.load(templatePath, lb.toList)
           template.render(context)
           throw new RenderScalateTemplate(buffer.toString,templateName)
