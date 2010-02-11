@@ -42,11 +42,7 @@ private[wrappers] object ScalateWrapper  {
   def renderScalateTemplate(templateName:String, args:Array[AnyRef]) = {
     val engine = new TemplateEngine
     engine.workingDirectory = new java.io.File(Play.applicationPath+"/tmp")
-    if (Play.mode == Play.Mode.DEV) {
-      engine.allowCaching =  true
-      engine.allowReload = true
-    } else {
-      engine.allowCaching =  true
+    if (Play.mode == Play.Mode.PROD) {
       engine.allowReload = false
     }
     val renderMode = Play.configuration.getProperty("scalate") 
