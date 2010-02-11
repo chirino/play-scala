@@ -5,7 +5,7 @@ import play.mvc._
 
 object Application extends Controller with Secure {
     
-    def index(name: String = "Guest") = render(name)
+    def index(name: String = "Guest user") = render(name)
     
 }
 

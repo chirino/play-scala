@@ -7,7 +7,6 @@ import play.data.validation.Validation
 import org.fusesource.scalate._
 import java.io.{StringWriter,PrintWriter}
 import scala.collection.JavaConversions._
-
 private[wrappers] object ScalateWrapper  {
   val engine = new TemplateEngine
 
@@ -42,27 +41,36 @@ private[wrappers] object ScalateWrapper  {
 
   //render with scalate
   def renderScalateTemplate(templateName:String, args:Array[AnyRef]) = {
+    val renderMode = Play.configuration.getProperty("scalate") 
     //loading template
-    val template = engine.load(Play.applicationPath+"/app/views/"+templateName)
+    val lb = new scala.collection.mutable.ListBuffer[Binding]
     val buffer = new StringWriter()
-    val context = new DefaultRenderContext(engine, new PrintWriter(buffer))
+    var context = new DefaultRenderContext(engine, new PrintWriter(buffer))
     val templateBinding = Scope.RenderArgs.current()
     // try to fill context
     for (o <-args) {
-      for (name <-LocalVariablesNamesTracer.getAllLocalVariableNames(o)) {
+      for (name <-LocalVariablesNamesTracer.getAllLocalVariableNames(o).iterator) {
         context.attributes += name -> o
+        lb += Binding(name,o.getClass.getName)
       }
     }
     context.attributes += "session" -> Scope.Session.current
+    //lb += Binding("session",Scope.Session.current.getClass.getName)
     context.attributes += "request" -> Http.Request.current
+    //lb += Binding("request", Http.Request.current.getClass.getName)
     context.attributes += "flash" -> Scope.Flash.current
+    //lb += Binding("flash", Scope.Flash.current.getClass.getName)
     context.attributes += "params" ->  Scope.Params.current
+    //lb += Binding("params", Scope.Params.current.getClass.getName)
     try {
        context.attributes +="errors" -> Validation.errors()
     } catch { case ex:Exception => throw new UnexpectedException(ex)}
     try {
+          println("LB:"+lb.toList)
+          engine.bindings=lb.toList
+          val template = engine.load(Play.applicationPath+"/app/views/"+templateName.replaceAll(".html","."+renderMode))
           template.render(context)
-          throw new RenderScalateTemplate(buffer.toString, templateName)
+          throw new RenderScalateTemplate(buffer.toString,templateName)
     } catch { 
         case ex:TemplateNotFoundException => {
           if(ex.isSourceAvailable) {
