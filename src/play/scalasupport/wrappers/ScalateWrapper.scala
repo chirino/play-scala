@@ -20,6 +20,9 @@ private[wrappers] object ScalateWrapper  {
     Binding("flash", SourceCodeHelper.name(classOf[Scope.Flash])),
     Binding("params", SourceCodeHelper.name(classOf[Scope.Params]))
   )
+  if (Play.mode == Play.Mode.PROD) {
+    engine.allowReload = false
+  }
   
   def renderOrProvideTemplate(args:Array[AnyRef]):String = {
     //determine template
@@ -52,7 +55,6 @@ private[wrappers] object ScalateWrapper  {
 
   //render with scalate
   def renderScalateTemplate(templateName:String, args:Array[AnyRef]) = {
-      
     val renderMode = Play.configuration.getProperty("scalate") 
     //loading template
     val lb = new scala.collection.mutable.ListBuffer[Binding]

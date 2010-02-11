@@ -3,7 +3,7 @@ package controllers
 import play._
 import play.mvc._
 
-object Application extends Controller with Secure {
+object Application extends Controller  {
     
     def index(name: String = "Guest user") = render(name)
     
